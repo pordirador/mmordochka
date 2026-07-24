@@ -1,0 +1,323 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a;
+    color: #ddd;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.top-panel {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #444;
+    gap: 20px;
+}
+
+.gender-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gender-selector label {
+    color: #ddd;
+    font-weight: bold;
+}
+
+.gender-selector select {
+    background-color: #444;
+    color: white;
+    padding: 8px 12px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.gender-selector select:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.image-panel {
+    flex: 1;
+    padding: 20px;
+    background-color: #1e1e1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-container {
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    border: 2px solid #444;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#faceCanvas {
+    max-width: 100%;
+    max-height: 70vh;
+    cursor: crosshair;
+}
+
+.instruction {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #ffd700;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    display: none;
+}
+
+.right-panel {
+    width: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    background-color: #252525;
+    overflow-y: auto;
+}
+
+.panel {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.panel h3 {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #4CAF50;
+}
+
+.help-text {
+    color: #aaa;
+    font-size: 12px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.points-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.point-item {
+    padding: 8px 12px;
+    margin: 3px 0;
+    background-color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.point-item:hover {
+    background-color: #3a3a3a;
+}
+
+.point-item.selected {
+    background-color: #4a6fa5;
+    border-left-color: #2196F3;
+    color: white;
+}
+
+.point-item.completed {
+    border-left-color: #4CAF50;
+    color: #4CAF50;
+}
+
+.stats {
+    font-weight: bold;
+    color: #4CAF50;
+    padding: 8px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background-color: #2196F3;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #1976D2;
+}
+
+.btn-success {
+    background-color: #4CAF50;
+    color: white;
+    flex: 1;
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+    flex: 1;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: #d32f2f;
+}
+
+.btn-nav {
+    background-color: #555;
+    color: white;
+    padding: 8px 15px;
+    flex: 1;
+}
+
+.btn-nav:hover:not(:disabled) {
+    background-color: #666;
+}
+
+.rating-box {
+    background-color: #3a3a3a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 2px solid #FFD700;
+    text-align: center;
+}
+
+.rating-percent {
+    font-size: 20px;
+    font-weight: bold;
+    color: #FFD700;
+}
+
+.rating-score {
+    font-size: 14px;
+    color: #aaa;
+    margin-top: 5px;
+}
+
+.metric-navigation {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.metric-info {
+    background-color: #333;
+    border-radius: 5px;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+.metric-name {
+    font-weight: bold;
+    color: #4CAF50;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 16px;
+    color: #ddd;
+    margin: 5px 0;
+}
+
+.metric-score {
+    font-size: 14px;
+    color: #FFD700;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.metric-level {
+    font-size: 13px;
+    margin: 5px 0;
+}
+
+.metric-ideal {
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 5px;
+}
+
+.results-scroll {
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #333;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#resultsText {
+    color: #ccc;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Скроллбары */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
