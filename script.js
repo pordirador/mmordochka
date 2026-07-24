@@ -463,4 +463,203 @@ class FaceAnalyzer {
         for (let i = 0; i < ranges.length; i++) {
             const [low, high, score] = ranges[i];
             if (value >= low && value <= high) {
-                const levels = ["Идеально", "Хорошо", "Средне", "Ниже среднего", "Плохо", "Очень плохо", "К
+                const levels = ["Идеально", "Хорошо", "Средне", "Ниже среднего", "Плохо", "Очень плохо", "Критично"];
+                return [score, levels[Math.min(i, levels.length - 1)], score];
+            }
+        }
+        
+        if (value < ranges[0][0]) {
+            const deviation = (ranges[0][0] - value) / ranges[0][0];
+            return [Math.max(0, ranges[ranges.length - 1][2] * (1 - deviation)), "Ниже нормы", ranges[0][2]];
+        }
+        
+        if (value > ranges[ranges.length - 1][1]) {
+            const deviation = (value - ranges[ranges.length - 1][1]) / ranges[ranges.length - 1][1];
+            return [Math.max(0, ranges[ranges.length - 1][2] * (1 - deviation)), "Выше нормы", ranges[0][2]];
+        }
+        
+        return [0, "Вне диапазона", ranges[0][2]];
+    }
+    
+    showMetric(index) {
+        if (!this.metricResults.length) return;
+        
+        this.currentMetricIndex = index;
+        const metric = this.metricResults[index];
+        
+        document.getElementById('metricName').textContent = metric.description;
+        
+        if (metric.status === 'error') {
+            document.getElementById('metricValue').innerHTML = `<span style="color: #F44336;">Ошибка расчета</span>`;
+            document.getElementById('metricIdeal').textContent = `Ошибка: ${metric.message}`;
+            document.getElementById('metricScore').textContent = '';
+            document.getElementById('metricLevel').textContent = '';
+        } else {
+            document.getElementById('metricValue').innerHTML = `Значение: <span style="color: #4CAF50;">${metric.valueStr} ${metric.unit}</span>`;
+            document.getElementById('metricScore').textContent = `⭐ Балл: ${metric.score.toFixed(1)}`;
+            document.getElementById('metricLevel').textContent = `Уровень: ${metric.level}`;
+            
+            const ranges = metric.ranges[this.gender];
+            if (ranges && ranges[0]) {
+                document.getElementById('metricIdeal').textContent = `Идеальный диапазон: ${ranges[0][0].toFixed(2)}-${ranges[0][1].toFixed(2)}`;
+            }
+        }
+        
+        const ratingPercent = this.maxScore > 0 ? (this.totalScore / this.maxScore * 100) : 0;
+        document.getElementById('ratingPercent').textContent = `Общий рейтинг: ${ratingPercent.toFixed(1)}%`;
+        document.getElementById('ratingScore').textContent = `Баллы: ${this.totalScore.toFixed(1)}/${this.maxScore.toFixed(1)}`;
+    }
+    
+    showPrevMetric() {
+        if (this.metricResults.length > 0) {
+            const newIndex = (this.currentMetricIndex - 1 + this.metricResults.length) % this.metricResults.length;
+            this.showMetric(newIndex);
+        }
+    }
+    
+    showNextMetric() {
+        if (this.metricResults.length > 0) {
+            const newIndex = (this.currentMetricIndex + 1) % this.metricResults.length;
+            this.showMetric(newIndex);
+        }
+    }
+    
+    showAllResults() {
+        const ratingPercent = this.maxScore > 0 ? (this.totalScore / this.maxScore * 100) : 0;
+        
+        let html = `<h3>Результаты анализа гармоничности лица</h3>`;
+        html += `<div class="rating-box">
+            <div class="rating-percent">Общий рейтинг: ${ratingPercent.toFixed(1)}%</div>
+            <div class="rating-score">Баллы: ${this.totalScore.toFixed(1)} / ${this.maxScore.toFixed(1)}</div>
+            <div class="rating-score">Пол: ${this.gender === 'male' ? 'Мужской' : 'Женский'}</div>
+        </div>`;
+        
+        this.metricResults.forEach(metric => {
+            html += `<div style="background: #3a3a3a; border-left: 4px solid ${metric.status === 'ok' ? '#4CAF50' : '#FF9800'}; padding: 10px; margin: 5px 0; border-radius: 5px;">`;
+            html += `<div style="font-weight: bold;">${metric.description}</div>`;
+            
+            if (metric.status === 'error') {
+                html += `<div style="color: #F44336;">Ошибка: ${metric.message}</div>`;
+            } else {
+                html += `<div>Значение: ${metric.valueStr} ${metric.unit}</div>`;
+                html += `<div style="color: #FFD700;">⭐ Балл: ${metric.score.toFixed(1)}</div>`;
+                html += `<div>Уровень: ${metric.level}</div>`;
+            }
+            html += `</div>`;
+        });
+        
+        document.getElementById('resultsText').innerHTML = html;
+    }
+    
+    showInstruction(text) {
+        const instruction = document.getElementById('instruction');
+        instruction.textContent = text;
+        instruction.style.display = 'block';
+    }
+    
+    hideInstruction() {
+        document.getElementById('instruction').style.display = 'none';
+    }
+    
+    // Методы расчета
+    calcLength(p1, p2) {
+        const dx = (p1.x - p2.x) * this.currentImageWidth;
+        const dy = (p1.y - p2.y) * this.currentImageHeight;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    calcFaceAspectRatio(pForehead, pChin, pLeftCheek, pRightCheek) {
+        const faceLength = this.calcLength(pForehead, pChin);
+        const faceWidth = this.calcLength(pLeftCheek, pRightCheek);
+        return faceWidth !== 0 ? faceLength / faceWidth : 0;
+    }
+    
+    calcFacialThirds(pForehead, pGlabella, pSubnasale, pChin) {
+        const totalLength = this.calcLength(pForehead, pChin);
+        if (totalLength === 0) return [0, 0, 0];
+        
+        const firstThird = this.calcLength(pForehead, pGlabella) / totalLength * 100;
+        const secondThird = this.calcLength(pGlabella, pSubnasale) / totalLength * 100;
+        const thirdThird = this.calcLength(pSubnasale, pChin) / totalLength * 100;
+        
+        return [firstThird, secondThird, thirdThird];
+    }
+    
+    calcInterpupillaryToFaceWidth(pLeftPupil, pRightPupil, pLeftCheek, pRightCheek) {
+        const pupilDistance = this.calcLength(pLeftPupil, pRightPupil);
+        const faceWidth = this.calcLength(pLeftCheek, pRightCheek);
+        return faceWidth !== 0 ? (pupilDistance / faceWidth * 100) : 0;
+    }
+    
+    calcJawWidthToFace(pLeftGonion, pRightGonion, pLeftCheek, pRightCheek) {
+        const jawWidth = this.calcLength(pLeftGonion, pRightGonion);
+        const faceWidth = this.calcLength(pLeftCheek, pRightCheek);
+        return faceWidth !== 0 ? jawWidth / faceWidth : 0;
+    }
+    
+    calcChinPhiltrumRatio(pChin, pForehead, pUpperLip, pSubnasale) {
+        const chinToForehead = this.calcLength(pChin, pForehead);
+        const lipToSubnasale = this.calcLength(pUpperLip, pSubnasale);
+        return lipToSubnasale !== 0 ? chinToForehead / lipToSubnasale : 0;
+    }
+    
+    calcJawAngle(pLeftJaw, pLeftChinCorner, pRightJaw, pRightChinCorner) {
+        const v1x = (pLeftJaw.x - pLeftChinCorner.x) * this.currentImageWidth;
+        const v1y = (pLeftJaw.y - pLeftChinCorner.y) * this.currentImageHeight;
+        const v2x = (pRightJaw.x - pRightChinCorner.x) * this.currentImageWidth;
+        const v2y = (pRightJaw.y - pRightChinCorner.y) * this.currentImageHeight;
+        
+        const dotProduct = v1x * v2x + v1y * v2y;
+        const normV1 = Math.sqrt(v1x * v1x + v1y * v1y);
+        const normV2 = Math.sqrt(v2x * v2x + v2y * v2y);
+        
+        if (normV1 === 0 || normV2 === 0) return 0;
+        
+        const cosAngle = Math.max(-1, Math.min(1, dotProduct / (normV1 * normV2)));
+        return Math.acos(cosAngle) * 180 / Math.PI;
+    }
+    
+    calcFwhr(pLeftCheek, pRightCheek, pGlabella, pUpperLip) {
+        const faceWidth = this.calcLength(pLeftCheek, pRightCheek);
+        const faceHeight = this.calcLength(pGlabella, pUpperLip);
+        return faceHeight !== 0 ? faceWidth / faceHeight : 0;
+    }
+    
+    calcCheekHeightRatio(pLeftPupil, pRightPupil, pLeftCheek, pRightCheek, pUpperLip) {
+        const distanceToLine = (point, lineP1, lineP2) => {
+            const x0 = point.x * this.currentImageWidth;
+            const y0 = point.y * this.currentImageHeight;
+            const x1 = lineP1.x * this.currentImageWidth;
+            const y1 = lineP1.y * this.currentImageHeight;
+            const x2 = lineP2.x * this.currentImageWidth;
+            const y2 = lineP2.y * this.currentImageHeight;
+            
+            const numerator = Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1);
+            const denominator = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2);
+            
+            return denominator !== 0 ? numerator / denominator : 0;
+        };
+        
+        const distToPupilLine = distanceToLine(pUpperLip, pLeftPupil, pRightPupil);
+        const distToCheekLine = distanceToLine(pUpperLip, pLeftCheek, pRightCheek);
+        
+        return distToPupilLine !== 0 ? distToCheekLine / distToPupilLine : 0;
+    }
+    
+    calcLateralCanthalTilt(pLeftOuter, pRightOuter, pLeftInner, pRightInner) {
+        const leftAngle = Math.atan2(
+            (pLeftOuter.y - pLeftInner.y) * this.currentImageHeight,
+            (pLeftOuter.x - pLeftInner.x) * this.currentImageWidth
+        ) * 180 / Math.PI;
+        
+        const rightAngle = Math.atan2(
+            (pRightOuter.y - pRightInner.y) * this.currentImageHeight,
+            (pRightOuter.x - pRightInner.x) * this.currentImageWidth
+        ) * 180 / Math.PI;
+        
+        return (leftAngle + rightAngle) / 2;
+    }
+}
+
+// Инициализация приложения
+const app = new FaceAnalyzer();
