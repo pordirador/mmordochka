@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализатор лица - Ручная расстановка точек</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Верхняя панель -->
+        <div class="top-panel">
+            <button id="loadImageBtn" class="btn btn-primary">
+                📷 Загрузить изображение
+            </button>
+            
+            <div class="gender-selector">
+                <label for="genderSelect">Пол:</label>
+                <select id="genderSelect">
+                    <option value="male">Мужской</option>
+                    <option value="female">Женский</option>
+                </select>
+            </div>
+            
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        </div>
+
+        <!-- Основной контент -->
+        <div class="main-content">
+            <!-- Левая панель с изображением -->
+            <div class="image-panel">
+                <div class="image-container" id="imageContainer">
+                    <canvas id="faceCanvas"></canvas>
+                    <div id="instruction" class="instruction"></div>
+                </div>
+            </div>
+
+            <!-- Правая панель -->
+            <div class="right-panel">
+                <!-- Панель управления точками -->
+                <div class="panel points-panel">
+                    <h3>Ручная расстановка точек</h3>
+                    <p class="help-text">1. Выберите точку из списка<br>2. Кликните на фото, чтобы поставить её</p>
+                    
+                    <div class="points-list" id="pointsList"></div>
+                    
+                    <div class="stats" id="statsLabel">Поставлено точек: 0/28</div>
+                    
+                    <div class="button-group">
+                        <button id="clearPointsBtn" class="btn btn-danger">
+                            Очистить все
+                        </button>
+                        <button id="analyzeBtn" class="btn btn-success" disabled>
+                            Анализировать
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Панель результатов -->
+                <div class="panel results-panel">
+                    <h3>Результаты анализа</h3>
+                    
+                    <div class="rating-box" id="ratingBox">
+                        <div class="rating-percent" id="ratingPercent">Общий рейтинг: 0%</div>
+                        <div class="rating-score" id="ratingScore">Баллы: 0/0</div>
+                    </div>
+                    
+                    <div class="metric-navigation">
+                        <button id="prevMetricBtn" class="btn btn-nav">← Предыдущий</button>
+                        <button id="nextMetricBtn" class="btn btn-nav">Следующий →</button>
+                    </div>
+                    
+                    <div class="metric-info" id="metricInfo">
+                        <div class="metric-name" id="metricName">Выберите точку из списка слева</div>
+                        <div class="metric-value" id="metricValue"></div>
+                        <div class="metric-score" id="metricScore"></div>
+                        <div class="metric-level" id="metricLevel"></div>
+                        <div class="metric-ideal" id="metricIdeal"></div>
+                    </div>
+                    
+                    <div class="results-scroll" id="resultsScroll">
+                        <div id="resultsText">Поставьте точки на фото, затем нажмите 'Анализировать'</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
